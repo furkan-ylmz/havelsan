@@ -1,2 +1,11 @@
-https://copilot.microsoft.com/shares/PXhMAj15jtSjmQqE4Dbta
-https://copilot.microsoft.com/shares/ucruUZ8txbj1P62mxchoV
+genel proje - https://copilot.microsoft.com/shares/PXhMAj15jtSjmQqE4Dbta
+literatür - https://copilot.microsoft.com/shares/BzktwEaYv8NP63nnrLp59
+
+AIS Verisi Çözümleme: Otomatik Tanımlama Sistemi (AIS) verilerini alır ve gemi konumlarını harita üzerinde gösterir. - https://github.com/OpenCPN/OpenCPN
+AIS mesajları genellikle NMEA 0183 formatında gelir ve bu kütüphane bu mesajları ayrıştırarak gemi bilgilerini anlamlı hale getirir. - https://github.com/M0r13n/pyais
+AIS-catcher, gemilerden gelen AIS sinyallerini almak ve çözümlemek için geliştirilmiş, çok platformlu bir komut satırı uygulamasıdır. - https://github.com/jvde-github/AIS-catcher
+Denizcilik elektroniğiyle çalışan Java uygulamaları geliştirmek isteyenler için oldukça kullanışlı. AIS veri görselleştirme modülü tasarlayabiliriz - https://github.com/ktuukkan/marine-api
+Hem AIS verisini alma, hem de görselleştirme ve sistem entegrasyonu açısından mükemmel bir temel olabilir. - https://github.com/bareboat-necessities/my-bareboat
+Arka uçta AIS mesajlarını hızlıca çözümleyip görsel sistemlere aktarmak. - https://github.com/ais-dotnet/Ais.Net
+MarineTraffic tarafından geliştirilen ve tarihsel AIS verilerini kullanarak yoğunluk haritaları (density maps) oluşturan bir Python modülüdür. - https://github.com/marinetraffic/mt-ais-toolbox
+AIS mesajlarının nasıl oluşturulabileceğini, simüle edilebileceğini ve yayınlanabileceğini gösteren bir araştırma amaçlı toolkit’tir. - https://github.com/trendmicro/ais
