@@ -181,9 +181,38 @@ def load_labelme_annotations(json_path):
     return ships
 
 def create_sample_ais_data(num_ships: int = 3, base_position: Tuple[float, float] = (40.0, 32.0)) -> List[AISTarget]:
-    """Örnek AIS verisi oluşturur"""
-    base_lat, base_lon = base_position
+    """JSON dosyasından örnek AIS verisi yükler"""
     ais_targets = []
+    
+    try:
+        # JSON dosyasından sabit AIS verilerini oku
+        json_file = Path("data/sample_ais.json")  # data klasöründe
+        if json_file.exists():
+            with open(json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # İstenen sayıda gemi seç
+            vessels = data.get('sample_vessels', [])
+            selected_vessels = vessels[:min(num_ships, len(vessels))]
+            
+            for vessel in selected_vessels:
+                ais_target = AISTarget(
+                    mmsi=vessel.get('mmsi', 123456000),
+                    lat=vessel.get('lat', 40.0),
+                    lon=vessel.get('lon', 32.0),
+                    length=vessel.get('length', 100.0),
+                    width=vessel.get('width', 20.0)
+                )
+                ais_targets.append(ais_target)
+            
+            print(f"📋 JSON'dan {len(ais_targets)} AIS verisi yüklendi")
+            return ais_targets
+            
+    except Exception as e:
+        print(f"⚠️ JSON yüklenemedi ({e}), rastgele veri oluşturuluyor...")
+    
+    # Hata durumunda eski rastgele yöntem
+    base_lat, base_lon = base_position
     
     for i in range(num_ships):
         lat_offset = np.random.uniform(-0.01, 0.01)
@@ -198,6 +227,7 @@ def create_sample_ais_data(num_ships: int = 3, base_position: Tuple[float, float
         )
         ais_targets.append(ais_target)
     
+    print(f"🎲 Rastgele {len(ais_targets)} AIS verisi oluşturuldu")
     return ais_targets
 
 def visualize_matches(image: np.ndarray, matches: List[tuple]) -> np.ndarray:

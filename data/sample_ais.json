@@ -1,0 +1,76 @@
+{
+  "sample_vessels": [
+    {
+      "mmsi": 271044431,
+      "ship_name": "MEDITERRANEAN STAR",
+      "lat": 40.0125,
+      "lon": 31.9876,
+      "length": 165.0,
+      "width": 25.0,
+      "ship_type": "Cargo"
+    },
+    {
+      "mmsi": 636019825,
+      "ship_name": "BOSPHORUS QUEEN", 
+      "lat": 40.0087,
+      "lon": 32.0143,
+      "length": 89.0,
+      "width": 15.0,
+      "ship_type": "Passenger"
+    },
+    {
+      "mmsi": 352001234,
+      "ship_name": "ANATOLIAN SPIRIT",
+      "lat": 39.9943,
+      "lon": 32.0021,
+      "length": 198.0,
+      "width": 32.0,
+      "ship_type": "Container"
+    },
+    {
+      "mmsi": 447123456,
+      "ship_name": "BLACK SEA TRADER",
+      "lat": 40.0234,
+      "lon": 31.9654,
+      "length": 120.0,
+      "width": 18.0,
+      "ship_type": "Tanker"
+    },
+    {
+      "mmsi": 212987654,
+      "ship_name": "TURKISH DELIGHT",
+      "lat": 39.9876,
+      "lon": 32.0287,
+      "length": 145.0,
+      "width": 22.0,
+      "ship_type": "Bulk Carrier"
+    },
+    {
+      "mmsi": 538123789,
+      "ship_name": "AEGEAN BREEZE",
+      "lat": 40.0156,
+      "lon": 31.9723,
+      "length": 87.0,
+      "width": 14.0,
+      "ship_type": "Ferry"
+    },
+    {
+      "mmsi": 319876543,
+      "ship_name": "GOLDEN HORN",
+      "lat": 39.9987,
+      "lon": 32.0098,
+      "length": 234.0,
+      "width": 36.0,
+      "ship_type": "Cruise"
+    },
+    {
+      "mmsi": 775654321,
+      "ship_name": "SEA PIONEER",
+      "lat": 40.0078,
+      "lon": 31.9945,
+      "length": 156.0,
+      "width": 23.0,
+      "ship_type": "General Cargo"
+    }
+  ]
+}

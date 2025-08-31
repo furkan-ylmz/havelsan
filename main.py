@@ -28,19 +28,45 @@ def run_video_test():
         from simple_detector import SimpleDetector
         detector = SimpleDetector()
         
-        # Video dosyası bul
-        video_files = ["data/videos/1.mp4", "data/videos/2.mp4", "data/videos/3.mp4", "data/videos/4.mp4"]
+        # Mevcut video dosyalarını bul
+        video_files = []
+        for i in range(1, 5):  # 1.mp4, 2.mp4, 3.mp4, 4.mp4
+            video_path = f"data/videos/{i}.mp4"
+            if Path(video_path).exists():
+                video_files.append(video_path)
         
-        for video in video_files:
-            if Path(video).exists():
-                print(f"Video: {video}")
-                detector.run_video(video)
-                break
+        if not video_files:
+            print("❌ Video dosyası bulunamadı!")
+            return
+            
+        # Video seçimi menüsü
+        print("\nMevcut videolar:")
+        for i, video in enumerate(video_files):
+            print(f"{i+1}. {video}")
+        print(f"{len(video_files)+1}. Tümünü çalıştır")
+        
+        choice = input(f"\nSeçiminiz (1-{len(video_files)+1}): ").strip()
+        
+        if choice.isdigit():
+            choice_num = int(choice)
+            if 1 <= choice_num <= len(video_files):
+                # Tek video çalıştır
+                selected_video = video_files[choice_num - 1]
+                print(f"\n🎥 Video çalıştırılıyor: {selected_video}")
+                detector.run_video(selected_video)
+            elif choice_num == len(video_files) + 1:
+                # Tüm videoları sırayla çalıştır
+                for video in video_files:
+                    print(f"\n🎥 Video çalıştırılıyor: {video}")
+                    detector.run_video(video)
+                    input("Sonraki video için Enter'a basın...")
+            else:
+                print("❌ Geçersiz seçim!")
         else:
-            print("Video dosyası bulunamadı!")
+            print("❌ Geçersiz seçim!")
             
     except Exception as e:
-        print(f"Hata: {e}")
+        print(f"❌ Hata: {e}")
 
 def main():
     while True:
