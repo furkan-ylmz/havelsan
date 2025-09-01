@@ -9,3 +9,4 @@ Hem AIS verisini alma, hem de görselleştirme ve sistem entegrasyonu açısınd
 Arka uçta AIS mesajlarını hızlıca çözümleyip görsel sistemlere aktarmak. - https://github.com/ais-dotnet/Ais.Net
 MarineTraffic tarafından geliştirilen ve tarihsel AIS verilerini kullanarak yoğunluk haritaları (density maps) oluşturan bir Python modülüdür. - https://github.com/marinetraffic/mt-ais-toolbox
 AIS mesajlarının nasıl oluşturulabileceğini, simüle edilebileceğini ve yayınlanabileceğini gösteren bir araştırma amaçlı toolkit’tir. - https://github.com/trendmicro/ais
+AIS verisi ile video görüntülerinden çıkarılan gemi izlerini eşleştirerek, iç su yollarında gemi trafiğini izlemek için geliştirilmiş bir sistemidir. - https://github.com/gy65896/DeepSORVF
