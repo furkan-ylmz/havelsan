@@ -137,21 +137,79 @@ class MatchingAlgorithm:
             return self.simple_nearest_matching(ais_points, detection_points)
 
 def test_matching():
-    """Test fonksiyonu"""
-    ais_points = [
-        AISPoint("GEMI A", "123456", 40.0, 32.0, 1.0, 1.0),
-        AISPoint("GEMI B", "789012", 40.1, 32.1, 2.0, 2.0)
-    ]
+    """Test fonksiyonu - visual_map_demo ile aynı veriyi kullan"""
+    import json
+    import os
+    from pathlib import Path
     
-    detection_points = [
-        DetectionPoint("TESPIT1", 1.1, 1.1),
-        DetectionPoint("TESPIT2", 2.1, 1.9)
-    ]
+    # AIS verilerini yükle (visual_map_demo ile aynı)
+    try:
+        with open("../data/sample_ais.json", 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            vessels = data.get('sample_vessels', [])
+    except:
+        print("AIS verisi yüklenemedi!")
+        return
     
-    matcher = MatchingAlgorithm()
-    matches = matcher.match(ais_points, detection_points)
+    # AIS noktalarını oluştur
+    ais_points = []
+    for vessel in vessels:
+        # GPS'den 2D'ye dönüştür
+        reference_lat, reference_lon = 40.0, 32.0
+        x = (vessel['lon'] - reference_lon) * 111000 * 0.766 / 1000  # cos(40°) ≈ 0.766
+        y = (vessel['lat'] - reference_lat) * 111000 / 1000
+        
+        ais_point = AISPoint(
+            name=vessel['ship_name'],
+            mmsi=str(vessel['mmsi']),
+            lat=vessel['lat'],
+            lon=vessel['lon'],
+            x=x,
+            y=y
+        )
+        ais_points.append(ais_point)
     
-    print(f"Toplam {len(matches)} eşleştirme bulundu.")
+    # Her görüntü için test yap
+    data_dir = Path("../data/txt")
+    if not data_dir.exists():
+        print("Tespit verisi bulunamadı!")
+        return
+    
+    total_matches = 0
+    image_count = 0
+    
+    for txt_file in data_dir.glob("*.txt"):
+        image_name = txt_file.stem
+        print(f"\n--- {image_name} işleniyor ---")
+        
+        # Tespit verilerini yükle
+        detection_points = []
+        try:
+            with open(txt_file, 'r') as f:
+                for line_idx, line in enumerate(f):
+                    parts = line.strip().split()
+                    if len(parts) >= 5:
+                        center_x, center_y = float(parts[1]), float(parts[2])
+                        
+                        # YOLO'dan 2D'ye dönüştür
+                        x_2d = (center_x - 0.5) * 8.0
+                        y_2d = (0.5 - center_y) * 6.0
+                        
+                        det_point = DetectionPoint(f"Detection_{line_idx}", x_2d, y_2d)
+                        detection_points.append(det_point)
+        except:
+            continue
+        
+        if detection_points:
+            matcher = MatchingAlgorithm(max_distance=10.0)
+            matches = matcher.match(ais_points, detection_points)
+            print(f"  AIS: {len(ais_points)}, Tespit: {len(detection_points)}, Eşleştirme: {len(matches)}")
+            total_matches += len(matches)
+            image_count += 1
+    
+    print(f"\n=== TOPLAM ===")
+    print(f"İşlenen görüntü: {image_count}")
+    print(f"Toplam eşleştirme: {total_matches}")
 
 if __name__ == "__main__":
     test_matching()

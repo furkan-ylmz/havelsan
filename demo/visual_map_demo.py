@@ -15,6 +15,9 @@ matplotlib.use('TkAgg')  # Veya 'Qt5Agg' dene
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Matching algorithm'ı import et
+from matching_algorithm import MatchingAlgorithm, AISPoint, DetectionPoint
+
 # Türkçe font desteği için
 plt.rcParams['font.size'] = 10
 plt.rcParams['axes.unicode_minus'] = False
@@ -194,68 +197,60 @@ def load_detection_data(data_dir):
     return points
 
 def calculate_matching(ais_points, detection_points, max_distance=8.0):
-    """Hungarian algoritması ile optimal eşleştirme"""
+    """MatchingAlgorithm kullanarak eşleştirme yap"""
     if not ais_points or not detection_points:
         return []
     
-    # Maliyet matrisi oluştur
-    n_ais = len(ais_points)
-    n_det = len(detection_points)
+    # AIS verilerini MatchingAlgorithm formatına çevir
+    ais_algorithm_points = []
+    for ais in ais_points:
+        ais_point = AISPoint(
+            name=ais['name'],
+            mmsi=str(ais['mmsi']),
+            lat=ais['lat'],
+            lon=ais['lon'],
+            x=ais['x'],
+            y=ais['y']
+        )
+        ais_algorithm_points.append(ais_point)
     
-    # Sadece Python kullanarak Hungarian algoritması
-    cost_matrix = []
+    # Detection verilerini MatchingAlgorithm formatına çevir  
+    det_algorithm_points = []
+    for i, det in enumerate(detection_points):
+        det_point = DetectionPoint(
+            id=f"Detection_{i}",
+            x=det['x'],
+            y=det['y']
+        )
+        det_algorithm_points.append(det_point)
     
-    for i, ais in enumerate(ais_points):
-        row = []
-        for j, det in enumerate(detection_points):
-            distance = math.sqrt((ais['x'] - det['x'])**2 + (ais['y'] - det['y'])**2)
-            if distance <= max_distance:
-                row.append(distance)
-            else:
-                row.append(999.0)  # Çok yüksek maliyet (eşleştirme yok)
-        cost_matrix.append(row)
+    # MatchingAlgorithm kullanarak eşleştir
+    matcher = MatchingAlgorithm(max_distance=max_distance)
+    matches_algorithm = matcher.match(ais_algorithm_points, det_algorithm_points, method='hungarian')
     
-    # Basit greedy optimal eşleştirme (Hungarian'a yakın)
+    # Sonuçları visual_map formatına çevir
     matches = []
-    used_detections = set()
-    
-    # Tüm olası eşleştirmeleri hesapla ve en iyi kombinasyonu bul
-    possible_pairs = []
-    
-    for i, ais in enumerate(ais_points):
-        for j, det in enumerate(detection_points):
-            distance = cost_matrix[i][j]
-            if distance < 999.0:
-                possible_pairs.append({
-                    'ais_idx': i,
-                    'det_idx': j,
-                    'ais': ais,
-                    'detection': det,
-                    'distance': distance
-                })
-    
-    # Mesafeye göre sırala
-    possible_pairs.sort(key=lambda x: x['distance'])
-    
-    # Greedy optimal seçim
-    used_ais = set()
-    used_det = set()
-    
-    for pair in possible_pairs:
-        if pair['ais_idx'] not in used_ais and pair['det_idx'] not in used_det:
-            confidence = max(0, 1 - pair['distance'] / max_distance)
-            matches.append({
-                'ais': pair['ais'],
-                'detection': pair['detection'],
-                'distance': pair['distance'],
-                'confidence': confidence
-            })
-            used_ais.add(pair['ais_idx'])
-            used_det.add(pair['det_idx'])
+    for match in matches_algorithm:
+        match_dict = {
+            'ais': {
+                'name': match.ais_point.name,
+                'mmsi': match.ais_point.mmsi,
+                'x': match.ais_point.x,
+                'y': match.ais_point.y
+            },
+            'detection': {
+                'id': match.detection_point.id,
+                'x': match.detection_point.x,
+                'y': match.detection_point.y
+            },
+            'distance': match.distance,
+            'confidence': match.confidence
+        }
+        matches.append(match_dict)
     
     return matches
 
-def create_visual_map(ais_points, detection_points, matches):
+def create_visual_map(ais_points, detection_points, matches, image_name="default"):
     """Görsel harita oluştur"""
     
     # Figure boyutunu ayarla
@@ -372,8 +367,8 @@ def create_visual_map(ais_points, detection_points, matches):
     # Layout ayarla
     plt.tight_layout()
     
-    # Kaydet
-    output_file = "visual_map.png"
+    # Kaydet - görüntü adını dosya adına ekle
+    output_file = f"visual_map_{image_name}.png"
     plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white')
     plt.show()
 
@@ -401,7 +396,7 @@ def process_single_image(ais_points, image_name, data_dir, max_distance=10.0):
     print(f"  AIS noktaları: {len(ais_points)}")
     print(f"  Tespit noktaları: {len(detection_points)}")
     
-    # Eşleştirme yap
+    # Eşleştirme yap (MatchingAlgorithm kullan)
     matches = calculate_matching(ais_points, detection_points, max_distance)
     
     if matches:
@@ -450,16 +445,51 @@ def main():
     print(f"Toplam {len(all_results)} görüntü işlendi")
     print(f"Toplam {total_matches} eşleştirme bulundu")
     
-    # İlk görüntü için görsel harita oluştur
+    # Görsel harita için görüntü seçimi
     if all_results:
-        print(f"\n--- {all_results[0]['image_name']} için görsel harita oluşturuluyor ---")
-        try:
-            create_visual_map(all_results[0]['ais_points'], 
-                           all_results[0]['detection_points'], 
-                           all_results[0]['matches'])
-            print("Görsel harita oluşturuldu: visual_map.png")
-        except Exception as e:
-            print(f"Harita oluşturulamadı: {e}")
+        print(f"\n🎯 Görsel harita oluşturmak için görüntü seçin:")
+        for i, result in enumerate(all_results):
+            matches_count = len(result['matches'])
+            print(f"  {i+1}. {result['image_name']} ({matches_count} eşleştirme)")
+        print(f"  0. Hiçbiri (çıkış)")
+        
+        while True:
+            try:
+                choice = input(f"\nSeçiminizi yapın (1-{len(all_results)}, 0=çıkış): ").strip()
+                
+                if choice == "0":
+                    print("Çıkış yapıldı.")
+                    return
+                
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(all_results):
+                    selected_result = all_results[choice_num - 1]
+                    print(f"\n--- {selected_result['image_name']} için görsel harita oluşturuluyor ---")
+                    
+                    try:
+                        create_visual_map(selected_result['ais_points'], 
+                                       selected_result['detection_points'], 
+                                       selected_result['matches'],
+                                       selected_result['image_name'])
+                        print(f"Görsel harita oluşturuldu: visual_map_{selected_result['image_name']}.png")
+                        
+                        # Başka görüntü seçmek ister mi?
+                        again = input("\nBaşka bir görüntü seçmek ister misiniz? (e/h): ").strip().lower()
+                        if again not in ['e', 'evet', 'yes']:
+                            break
+                    except Exception as e:
+                        print(f"Harita oluşturulamadı: {e}")
+                        again = input("\nTekrar denemek ister misiniz? (e/h): ").strip().lower()
+                        if again not in ['e', 'evet', 'yes']:
+                            break
+                else:
+                    print(f"❌ Geçersiz seçim! 1-{len(all_results)} arasında bir sayı girin.")
+                    
+            except ValueError:
+                print("❌ Geçersiz girdi! Sadece sayı girin.")
+            except KeyboardInterrupt:
+                print("\n\nÇıkış yapıldı.")
+                return
 
 if __name__ == "__main__":
     main()
